@@ -10,18 +10,19 @@ Thanks so much for your purchase and please feel free to tag me @TheStrokeForge 
 '''
 
 bl_info = {
-    "name": "Vox Cleaner",
+    "name": "Vox Cleaner / Experimental",
     "author": "Farhan Shaikh",
-    "version": (1, 0),
-    "blender": (2, 93, 0),
+    "version": (1, 1),
+    "blender": (3, 0, 0),
     "location": "View3D > Sidebar/N-Panel > Item > Vox Cleaner",
     "description": "Cleans voxel models in a single click!",
-    "warning": "",
+    "warning": "Tweaked version by Shiratori",
     "doc_url": "https://www.thestrokeforge.xyz/vox-cleaner",
     "category": "Clean Mesh",
     }
     
 import bpy
+import math
 
 class MyData:
     MainObj = None
@@ -155,6 +156,12 @@ def SmartUVProject(context):
     bpy.ops.uv.smart_project(angle_limit=0.523599, island_margin=0.0003, correct_aspect=True, scale_to_bounds=False)
     bpy.ops.object.editmode_toggle()
     
+def SmartUVProject_experimental(context):
+    bpy.ops.object.editmode_toggle()    
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.uv.smart_project(angle_limit=0.6,island_margin=0.005,area_weight=0,correct_aspect=True,scale_to_bounds=False)
+    bpy.ops.object.editmode_toggle()
+    
             
     
 
@@ -239,7 +246,37 @@ class EZClean(bpy.types.Operator):
         
         
         return {'FINISHED'}
+        
+class EZCleanExperimental(bpy.types.Operator):
+    """● Click to lazy clean the selected model.
+● Time taken depends on the complexity of the model and the resolution of the generated texture.
+● Data specified in the image properties panel is used to generate the image
+● This custom function has been added by Shiratori"""
+    bl_idname = "voxcleaner.oneclickcleanexperimental"
+    bl_label = "Lazy Experimental"
+    bl_options = {'UNDO'}
 
+    def execute(self, context):
+        
+        
+        CleanModel(context)
+        EditMaterials(context)
+        
+        self.report({'INFO'}, "Geometry optimised and Material Set")
+        
+        
+        SmartUVProject_experimental(context)
+        
+        self.report({'INFO'}, "UVs projected, Bake started")
+        
+        
+        #self.report({'INFO'}, "Geometry optimised, bake started")
+        Bake(context)
+        
+        self.report({'INFO'}, "Model cleaned!")
+        
+        
+        return {'FINISHED'}
 
 class PrepareForUV(bpy.types.Operator):
     """● Cleans the model geometry, sets up a new material and generates a new image texture. 
@@ -331,7 +368,10 @@ class UILayout(bpy.types.Panel):
                             row = box.row()
                             row.scale_y = MyData.ButtonHeight
                             row.operator("voxcleaner.oneclickclean",icon = 'SOLO_ON')
-                        
+
+                            row = box.row()
+                            row.scale_y = MyData.ButtonHeight
+                            row.operator("voxcleaner.oneclickcleanexperimental",icon = 'FUND')                        
                         
                         if mytool.CleanMode == 'hard':
                             
@@ -380,20 +420,12 @@ class UILayout(bpy.types.Panel):
         else:
             box.label(icon="ERROR", text = "Enter object mode to clean")
 
-        
-        
-        
-        
-        
-        
-        
-
-
  
 def register():
     bpy.utils.register_class(ApplyVColors)
     bpy.utils.register_class(MyProperties) 
     bpy.utils.register_class(EZClean)
+    bpy.utils.register_class(EZCleanExperimental)
     bpy.utils.register_class(PrepareForUV)
     bpy.utils.register_class(AutoUV)
     bpy.utils.register_class(PostUVBake)
@@ -405,6 +437,7 @@ def unregister():
     bpy.utils.unregister_class(ApplyVColors)
     bpy.utils.unregister_class(MyProperties)
     bpy.utils.unregister_class(EZClean)
+    bpy.utils.register_class(EZCleanExperimental)
     bpy.utils.unregister_class(PrepareForUV)
     bpy.utils.unregister_class(AutoUV)
     bpy.utils.unregister_class(PostUVBake)
