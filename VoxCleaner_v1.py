@@ -437,7 +437,7 @@ def unregister():
     bpy.utils.unregister_class(ApplyVColors)
     bpy.utils.unregister_class(MyProperties)
     bpy.utils.unregister_class(EZClean)
-    bpy.utils.register_class(EZCleanExperimental)
+    bpy.utils.unregister_class(EZCleanExperimental)
     bpy.utils.unregister_class(PrepareForUV)
     bpy.utils.unregister_class(AutoUV)
     bpy.utils.unregister_class(PostUVBake)
